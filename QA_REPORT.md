@@ -38,7 +38,7 @@ The GitHub Actions workflows were updated to run these checks and package tag ve
 | Autonomous tests    | `src/testing/fixtures/`, `e2e/`, `playwright.config.ts`                       | Synthetic provider fixtures, local HTTP server, real extension startup/restart, deterministic UI scenarios, screenshots                                                                    |
 | Delivery            | `.github/workflows/`, `scripts/package.mjs`, `README.md`, `PRIVACY_POLICY.md` | Corepack/pnpm CI, tag-version packaging, archive validation, provider setup, token scopes, privacy and troubleshooting documentation                                                       |
 
-The pre-existing untracked `ENGINEERING_REVAMP_PLAN.md` was preserved. The legacy filtering tests remain covered; obsolete single-token Core tests were replaced by multi-account lifecycle tests.
+The legacy filtering tests remain covered; obsolete single-token Core tests were replaced by multi-account lifecycle tests.
 
 ## Coverage details
 
@@ -115,3 +115,9 @@ Native permission prompts and operating-system notification clicks require a man
 Azure Server support targets REST API 6.0 (Server 2020 and newer). Older Server versions and Firefox packaging are not verified. Azure status checks do not necessarily expose every branch-policy/build evaluation, and group-only review assignments may require Azure to expose the individual reviewer. These limits are documented in the README. OAuth and Microsoft Entra authentication remain outside this PAT-based implementation.
 
 Credentials are stored in extension-local browser storage, not OS secret storage. HTTP self-hosted endpoints remain supported as requested and do not encrypt credentials in transit. The UI and privacy policy explain these risks.
+
+## CI packaging follow-up
+
+The first hosted CI run passed the autonomous checks but failed during packaging because `GITHUB_REF_NAME=main` was treated as a version. Packaging now takes a GitHub ref name only when `GITHUB_REF_TYPE=tag`; branch and pull-request builds use the manifest version, and `RELEASE_VERSION` remains an explicit override. Seven archive-level regression tests cover those cases, invalid tags, and rejection of test host permissions. They run as `pnpm test:package` and are included in `pnpm check` and `pnpm qa:autonomous`.
+
+Automatic releases now follow successful main builds, using the tested build artifact and a serialized patch-version allocation. Release tests cover initial and numeric version selection, reruns after newer releases, browser version limits, packaging/upload failure, draft recovery, and completed-release idempotency. The old tag-only artifact workflow has been replaced by the CI release job.

@@ -1,5 +1,8 @@
 name: CI
-on: [push, pull_request]
+on:
+  push:
+    branches: ["**"]
+  pull_request:
 permissions:
   contents: read
 jobs:
@@ -21,6 +24,13 @@ jobs:
       - run: pnpm qa:autonomous
       - run: pnpm package
       - uses: actions/upload-artifact@v4
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        with:
+          name: tested-extension
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: browser-test-results
@@ -28,3 +38,29 @@ jobs:
             playwright-report/
             test-results/
           retention-days: 14
+  release:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: main-releases
+      queue: max
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.12.0"
+      - uses: actions/download-artifact@v4
+        with:
+          name: tested-extension
+          path: dist/
+      - name: Tag and publish tested extension
+        run: node scripts/release.mjs
+        env:
+          GH_TOKEN: ${{ github.token }}

@@ -16,11 +16,13 @@
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "test:extension": "pnpm build && playwright test",
-    "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm build",
+    "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm build && pnpm test:package && pnpm test:release",
     "qa:autonomous": "pnpm check && pnpm test:extension",
     "test:live": "vitest run --config vitest.live.config.ts",
     "package": "node scripts/package.mjs",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "test:package": "node --test scripts/package.test.mjs",
+    "test:release": "node --test scripts/release.test.mjs"
   },
   "dependencies": {
     "@octokit/rest": "^22.0.0",

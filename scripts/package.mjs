@@ -4,7 +4,9 @@ import path from "node:path";
 const manifest = JSON.parse(await readFile("dist/manifest.json", "utf8"));
 const version = (
   process.env.RELEASE_VERSION ??
-  process.env.GITHUB_REF_NAME ??
+  (process.env.GITHUB_REF_TYPE === "tag"
+    ? process.env.GITHUB_REF_NAME
+    : undefined) ??
   manifest.version
 ).replace(/^v/, "");
 if (
