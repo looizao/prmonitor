@@ -100,7 +100,11 @@ Native browser permission prompts and operating-system notification interactions
 
 ## Release packaging
 
-CI uses Corepack, pinned Node, a frozen pnpm lockfile, the autonomous suite, and package validation. Tag builds insert the version into the generated manifest and produce a ZIP with popup/options HTML, background worker, generated JS/CSS, and images.
+CI runs on branch pushes and pull requests using Corepack, pinned Node, a frozen pnpm lockfile, the autonomous suite, and package validation. After each successful push to `main`, a separate job tags that tested commit and publishes a GitHub release containing the extension ZIP. Versions start at `v0.0.1` and increment the patch component of the highest stable `vMAJOR.MINOR.PATCH` tag (or the manifest version if higher). Release jobs queue to allocate versions one at a time. Rerunning a commit reuses its tag, resumes an unfinished draft, or leaves its completed release unchanged.
+
+The release job downloads the same run's tested production build, inserts the release version into its generated manifest, and packages popup/options HTML, the background worker, generated JS/CSS, and images. Only this job receives repository write permission. Pull requests and other branches run checks without publishing. Publishing runs directly after CI, so it does not depend on a bot-created tag triggering another workflow.
+
+For local packaging, branch and pull-request refs retain the manifest version; tag refs use their tag version. `RELEASE_VERSION` overrides either default. Archive and release regression tests run with `pnpm test:package` and `pnpm test:release`; both are included in `pnpm check`.
 
 ```sh
 pnpm build
