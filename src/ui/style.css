@@ -1,0 +1,404 @@
+:root {
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  color: #24324a;
+  background: #f4f6fa;
+  font-synthesis: none;
+  line-height: 1.5;
+  font-size: 14px;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+button,
+input,
+select {
+  font: inherit;
+}
+button,
+a,
+input,
+select {
+  outline-offset: 3px;
+}
+button {
+  cursor: pointer;
+  border: 1px solid #c9d3e2;
+  background: white;
+  color: #24324a;
+  padding: 7px 12px;
+  border-radius: 7px;
+  white-space: nowrap;
+}
+button:hover {
+  background: #eaf0fa;
+}
+button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+.primary {
+  background: #295bd6;
+  color: white;
+  border-color: #295bd6;
+}
+.primary:hover {
+  background: #1e49b6;
+}
+.danger {
+  color: #b42318;
+  border-color: #e9b1aa;
+}
+a {
+  color: #2452b8;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+h1 {
+  font-size: 24px;
+  letter-spacing: -0.6px;
+}
+h2 {
+  font-size: 18px;
+}
+h3 {
+  font-size: 15px;
+}
+small,
+.muted {
+  color: #607089;
+}
+.shell {
+  max-width: 1040px;
+  margin: 40px auto;
+  padding: 0 28px 40px;
+}
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.brand img {
+  width: 36px;
+  height: 36px;
+}
+.eyebrow {
+  color: #607089;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.intro {
+  max-width: 680px;
+  margin-bottom: 24px;
+  color: #52647b;
+}
+.card {
+  background: white;
+  border: 1px solid #dce3ee;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 5px #23385b05;
+}
+.accounts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.account-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.badge {
+  display: inline-block;
+  border-radius: 5px;
+  padding: 2px 7px;
+  font-size: 11px;
+  font-weight: 650;
+  background: #eaf0ff;
+  color: #3153a0;
+}
+.azure {
+  background: #e2f3f9;
+  color: #146681;
+}
+.account-url {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+  margin: 10px 0 16px;
+  color: #607089;
+}
+.identity {
+  font-weight: 600;
+}
+.state {
+  font-size: 12px;
+  margin-top: 3px;
+  color: #607089;
+}
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+.warning,
+.error {
+  background: #fff3eb;
+  border: 1px solid #f0c9ac;
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: #904515;
+  font-size: 13px;
+  margin-bottom: 14px;
+  overflow-wrap: anywhere;
+}
+.error {
+  background: #fff0ef;
+  border-color: #ebbbb6;
+  color: #a12920;
+}
+.notice {
+  background: #eaf5ee;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 14px;
+  color: #286440;
+}
+.empty {
+  text-align: center;
+  padding: 46px 24px;
+}
+.empty p {
+  color: #607089;
+  margin: 8px 0 20px;
+}
+.form {
+  margin-bottom: 22px;
+  max-width: 650px;
+}
+.form h2 {
+  margin-bottom: 16px;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 14px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.field input,
+.field select {
+  padding: 9px 10px;
+  border: 1px solid #bac7d9;
+  border-radius: 6px;
+  background: white;
+  min-width: 0;
+  width: 100%;
+  color: #24324a;
+}
+.checkbox {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 13px;
+}
+.checkbox input {
+  accent-color: #295bd6;
+}
+.help {
+  font-size: 12px;
+  color: #607089;
+  font-weight: 400;
+}
+.footer {
+  font-size: 12px;
+  color: #607089;
+  margin-top: 24px;
+}
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: #15264066;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 20;
+}
+.dialog {
+  max-width: 470px;
+}
+.dialog p {
+  margin-top: 12px;
+}
+.popup {
+  width: 600px;
+  max-width: 100vw;
+  padding: 16px;
+}
+.popup .top {
+  margin-bottom: 16px;
+}
+.popup h1 {
+  font-size: 19px;
+}
+.popup .brand img {
+  width: 28px;
+  height: 28px;
+}
+.popup .actions {
+  margin: 0;
+}
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  gap: 10px;
+}
+.toolbar select {
+  max-width: 220px;
+  padding: 6px;
+  border: 1px solid #c9d3e2;
+  border-radius: 6px;
+  background: white;
+}
+.tabs {
+  display: flex;
+  border-bottom: 1px solid #d5deeb;
+  margin-bottom: 12px;
+  gap: 3px;
+}
+.tabs button {
+  border: 0;
+  border-radius: 5px 5px 0 0;
+  padding: 9px;
+  background: transparent;
+  font-size: 13px;
+}
+.tabs button[aria-selected="true"] {
+  background: white;
+  border-bottom: 2px solid #295bd6;
+  color: #2452b8;
+  font-weight: 600;
+}
+.count {
+  font-size: 11px;
+  background: #e8edf5;
+  border-radius: 8px;
+  padding: 1px 5px;
+  margin-left: 4px;
+}
+.pr {
+  padding: 14px;
+  margin-bottom: 9px;
+}
+.pr-title {
+  font-weight: 650;
+  font-size: 14px;
+  display: block;
+  margin: 7px 0;
+}
+.pr-meta {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  flex-wrap: wrap;
+  color: #607089;
+  font-size: 11px;
+}
+.pr .actions {
+  margin-top: 10px;
+  gap: 6px;
+}
+.pr .actions button,
+.pr select {
+  font-size: 11px;
+  padding: 4px 7px;
+  border: 1px solid #d5deeb;
+  border-radius: 5px;
+  background: white;
+  color: #52647b;
+}
+.pr select {
+  max-width: 180px;
+}
+.change-add {
+  color: #24804c;
+}
+.change-delete {
+  color: #b54646;
+}
+details {
+  margin-top: 16px;
+  font-size: 12px;
+}
+summary {
+  cursor: pointer;
+  color: #52647b;
+}
+details .checkbox {
+  margin: 10px 0;
+}
+details .field {
+  margin-top: 12px;
+}
+.ignore-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 8px 0;
+}
+.ignore-row a {
+  overflow-wrap: anywhere;
+}
+body:has(.popup) {
+  background: #f4f6fa;
+}
+@media (max-width: 720px) {
+  .shell {
+    margin-top: 24px;
+    padding: 0 16px 24px;
+  }
+  .accounts {
+    grid-template-columns: 1fr;
+  }
+  .top {
+    flex-wrap: wrap;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  button {
+    transition: background 0.12s;
+  }
+}

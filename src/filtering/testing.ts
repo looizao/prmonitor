@@ -7,13 +7,13 @@ export function getFilteredBucket(
   context: Context,
   userLogin: string,
   muteConfiguration: MuteConfiguration,
-  pr: PullRequest
+  pr: PullRequest,
 ) {
   const filteredPullRequests = filterPullRequests(
     context,
     userLogin,
     [pr],
-    muteConfiguration
+    muteConfiguration,
   );
   const filters: Filter[] = [];
   if (filteredPullRequests.incoming.length > 0) {

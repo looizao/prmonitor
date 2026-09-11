@@ -12,11 +12,11 @@ import {
 export function isMuted(
   context: Context,
   pr: PullRequest,
-  muteConfiguration: MuteConfiguration
+  muteConfiguration: MuteConfiguration,
 ): MutedResult {
   const currentTime = context.getCurrentTime();
   for (const [owner, ignoreConfiguration] of Object.entries(
-    muteConfiguration.ignored || {}
+    muteConfiguration.ignored || {},
   )) {
     if (pr.repoOwner !== owner) {
       continue;
@@ -33,6 +33,7 @@ export function isMuted(
   }
   for (const muted of muteConfiguration.mutedPullRequests) {
     if (
+      (muted.accountId ?? "legacy-github") === pr.accountId &&
       muted.repo.owner === pr.repoOwner &&
       muted.repo.name === pr.repoName &&
       muted.number === pr.pullRequestNumber

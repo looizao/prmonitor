@@ -1,3 +1,4 @@
+import type { AccountConfig } from "../../accounts/model";
 import { RestEndpointMethodTypes } from "@octokit/rest";
 import {
   GitHubApi,
@@ -23,34 +24,51 @@ import {
  */
 export async function refreshOpenPullRequests(
   githubApi: GitHubApi,
-  userLogin: string
+  userLogin: string,
+  account?: AccountConfig,
 ): Promise<PullRequest[]> {
   // Note: each query should specifically exclude the previous ones so we don't end up having
   // to deduplicate PRs across lists.
   const reviewRequestedPullRequests = await githubApi.searchPullRequests(
-    `review-requested:${userLogin} -author:${userLogin} is:open archived:false`
+    `review-requested:${userLogin} -author:${userLogin} is:open archived:false`,
   );
   const commentedPullRequests = await githubApi.searchPullRequests(
-    `commenter:${userLogin} -author:${userLogin} -review-requested:${userLogin} is:open archived:false`
+    `commenter:${userLogin} -author:${userLogin} -review-requested:${userLogin} is:open archived:false`,
   );
   const ownPullRequests = await githubApi.searchPullRequests(
-    `author:${userLogin} is:open archived:false`
+    `author:${userLogin} is:open archived:false`,
   );
-  return Promise.all([
-    ...reviewRequestedPullRequests.map((pr) =>
-      updateCommentsAndReviews(githubApi, pr, true)
-    ),
-    ...commentedPullRequests.map((pr) =>
-      updateCommentsAndReviews(githubApi, pr)
-    ),
-    ...ownPullRequests.map((pr) => updateCommentsAndReviews(githubApi, pr)),
-  ]);
+  const pending = [
+    ...reviewRequestedPullRequests.map((pr) => ({ pr, requested: true })),
+    ...commentedPullRequests.map((pr) => ({ pr, requested: false })),
+    ...ownPullRequests.map((pr) => ({ pr, requested: false })),
+  ];
+  const results: PullRequest[] = [];
+  // Each PR loads five resources. Bound fan-out instead of starting every PR at once.
+  for (let offset = 0; offset < pending.length; offset += 2) {
+    results.push(
+      ...(await Promise.all(
+        pending
+          .slice(offset, offset + 2)
+          .map(({ pr, requested }) =>
+            updateCommentsAndReviews(githubApi, pr, requested),
+          ),
+      )),
+    );
+  }
+  return results.map((pr) => ({
+    ...pr,
+    accountId: account?.id || "legacy-github",
+    accountName: account?.name || "GitHub.com",
+    provider: "github",
+    currentUserLogin: userLogin,
+  }));
 }
 
 async function updateCommentsAndReviews(
   githubApi: GitHubApi,
   rawPullRequest: RestEndpointMethodTypes["search"]["issuesAndPullRequests"]["response"]["data"]["items"][number],
-  isReviewRequested = false
+  isReviewRequested = false,
 ): Promise<PullRequest> {
   const repo = extractRepo(rawPullRequest);
   const pr: PullRequestReference = {
@@ -70,19 +88,19 @@ async function updateCommentsAndReviews(
         authorLogin: review.user ? review.user.login : "",
         state: review.state as ReviewState,
         submittedAt: review.submitted_at,
-      }))
+      })),
     ),
     githubApi.loadComments(pr).then((comments) =>
       comments.map((comment) => ({
         authorLogin: comment.user ? comment.user.login : "",
         createdAt: comment.created_at,
-      }))
+      })),
     ),
     githubApi.loadCommits(pr).then((commits) =>
       commits.map((commit) => ({
         authorLogin: commit.author ? commit.author.login : "",
         createdAt: commit.commit.author?.date,
-      }))
+      })),
     ),
     githubApi.loadPullRequestStatus(pr),
   ]);
@@ -94,7 +112,7 @@ async function updateCommentsAndReviews(
     freshComments,
     freshCommits,
     isReviewRequested,
-    pullRequestStatus
+    pullRequestStatus,
   );
 }
 
@@ -105,10 +123,14 @@ function pullRequestFromResponse(
   comments: Comment[],
   commits: Commit[],
   reviewRequested: boolean,
-  status: PullRequestStatus
+  status: PullRequestStatus,
 ): PullRequest {
   const repo = extractRepo(response);
   return {
+    accountId: "legacy-github",
+    accountName: "GitHub.com",
+    provider: "github",
+    currentUserLogin: "",
     nodeId: response.node_id,
     htmlUrl: response.html_url,
     repoOwner: repo.owner,
@@ -129,10 +151,10 @@ function pullRequestFromResponse(
     mergeable: details.mergeable || false,
     reviewRequested,
     requestedReviewers: nonEmptyItems(
-      details.requested_reviewers?.map((reviewer) => reviewer?.login)
+      details.requested_reviewers?.map((reviewer) => reviewer?.login),
     ),
     requestedTeams: nonEmptyItems(
-      details.requested_teams?.map((team) => team?.name)
+      details.requested_teams?.map((team) => team?.name),
     ),
     reviews,
     comments,
@@ -143,7 +165,7 @@ function pullRequestFromResponse(
 }
 
 function extractRepo(
-  response: RestEndpointMethodTypes["search"]["issuesAndPullRequests"]["response"]["data"]["items"][number]
+  response: RestEndpointMethodTypes["search"]["issuesAndPullRequests"]["response"]["data"]["items"][number],
 ): RepoReference {
   const urlParts = response.repository_url.split("/");
   if (urlParts.length < 2) {

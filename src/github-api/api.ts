@@ -1,6 +1,8 @@
-import { PaginationResults } from "@octokit/plugin-paginate-rest/dist-types/types";
 import { Octokit } from "@octokit/rest";
-import { GetResponseDataTypeFromEndpointMethod } from "@octokit/types";
+import type { RestEndpointMethodTypes } from "@octokit/rest";
+type GetResponseDataTypeFromEndpointMethod<
+  T extends (...args: never[]) => unknown,
+> = Awaited<ReturnType<T>> extends { data: infer D } ? D : never;
 
 /**
  * A simple wrapper around GitHub's API.
@@ -18,25 +20,21 @@ export interface GitHubApi {
    */
   searchPullRequests(query: string): Promise<
     // Note: There might be a more efficient way to represent this type.
-    PaginationResults<
-      GetResponseDataTypeFromEndpointMethod<
-        Octokit["search"]["issuesAndPullRequests"]
-      >["items"][number]
-    >
+    RestEndpointMethodTypes["search"]["issuesAndPullRequests"]["response"]["data"]["items"]
   >;
 
   /**
    * Returns the details of a pull request.
    */
   loadPullRequestDetails(
-    pr: PullRequestReference
+    pr: PullRequestReference,
   ): Promise<GetResponseDataTypeFromEndpointMethod<Octokit["pulls"]["get"]>>;
 
   /**
    * Returns the full list of reviews for a pull request.
    */
   loadReviews(
-    pr: PullRequestReference
+    pr: PullRequestReference,
   ): Promise<
     GetResponseDataTypeFromEndpointMethod<Octokit["pulls"]["listReviews"]>
   >;
@@ -45,7 +43,7 @@ export interface GitHubApi {
    * Returns the full list of comments for a pull request.
    */
   loadComments(
-    pr: PullRequestReference
+    pr: PullRequestReference,
   ): Promise<
     GetResponseDataTypeFromEndpointMethod<Octokit["issues"]["listComments"]>
   >;
@@ -54,7 +52,7 @@ export interface GitHubApi {
    * Returns the full list of commits for a pull request.
    */
   loadCommits(
-    pr: PullRequestReference
+    pr: PullRequestReference,
   ): Promise<
     GetResponseDataTypeFromEndpointMethod<Octokit["pulls"]["listCommits"]>
   >;
@@ -67,17 +65,11 @@ export interface GitHubApi {
 
 // Ref: https://docs.github.com/en/graphql/reference/enums#pullrequestreviewdecision
 export type ReviewDecision =
-  | "APPROVED"
-  | "CHANGES_REQUESTED"
-  | "REVIEW_REQUIRED";
+  "APPROVED" | "CHANGES_REQUESTED" | "REVIEW_REQUIRED";
 
 // Ref: https://docs.github.com/en/graphql/reference/enums#statusstate
 export type CheckStatus =
-  | "ERROR"
-  | "EXPECTED"
-  | "FAILURE"
-  | "PENDING"
-  | "SUCCESS";
+  "ERROR" | "EXPECTED" | "FAILURE" | "PENDING" | "SUCCESS";
 
 export interface PullRequestStatus {
   reviewDecision: ReviewDecision;
@@ -90,6 +82,7 @@ export interface RepoReference {
 }
 
 export interface PullRequestReference {
+  accountId?: string;
   repo: RepoReference;
   number: number;
 }

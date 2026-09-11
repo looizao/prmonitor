@@ -6,7 +6,7 @@ import { Repo } from "../storage/loaded-state";
  * If `pushedAt` is null, the predicate will always return true.
  */
 export function repoWasPushedAfter(
-  pushedAt: string | null
+  pushedAt: string | null,
 ): (repo: Repo) => boolean {
   if (!pushedAt) {
     return () => true;

@@ -1,5 +1,4 @@
 import assertNever from "assert-never";
-import cloneDeep from "lodash/cloneDeep";
 import { Context } from "../environment/api";
 import { PullRequestReference, RepoReference } from "../github-api/api";
 
@@ -36,19 +35,19 @@ export function addMute(
   context: Context,
   config: MuteConfiguration,
   pullRequest: PullRequestReference,
-  muteType: MuteType
+  muteType: MuteType,
 ): MuteConfiguration {
   const muteConfiguration = {
+    ...config,
     // Remove any previous mute of this PR.
-    mutedPullRequests: [
-      ...config.mutedPullRequests.filter(
-        (pr) =>
-          pr.repo.owner !== pullRequest.repo.owner ||
-          pr.repo.name !== pullRequest.repo.name ||
-          pr.number !== pullRequest.number
-      ),
-    ],
-    ignored: cloneDeep(config.ignored || {}),
+    mutedPullRequests: config.mutedPullRequests.filter(
+      (pr) =>
+        pr.accountId !== pullRequest.accountId ||
+        pr.repo.owner !== pullRequest.repo.owner ||
+        pr.repo.name !== pullRequest.repo.name ||
+        pr.number !== pullRequest.number,
+    ),
+    ignored: structuredClone(config.ignored || {}),
   };
   // Add the new mute.
   switch (muteType) {
@@ -120,14 +119,16 @@ export function addMute(
 
 export function removePullRequestMute(
   config: MuteConfiguration,
-  pullRequest: PullRequestReference
+  pullRequest: PullRequestReference,
 ): MuteConfiguration {
   return {
+    ...config,
     mutedPullRequests: config.mutedPullRequests.filter(
       (pr) =>
+        pr.accountId !== pullRequest.accountId ||
         pr.repo.owner !== pullRequest.repo.owner ||
         pr.repo.name !== pullRequest.repo.name ||
-        pr.number !== pullRequest.number
+        pr.number !== pullRequest.number,
     ),
     ignored: config.ignored || {},
   };
@@ -135,9 +136,9 @@ export function removePullRequestMute(
 
 export function removeOwnerMute(
   config: MuteConfiguration,
-  owner: string
+  owner: string,
 ): MuteConfiguration {
-  const ignored = cloneDeep(config.ignored || {});
+  const ignored = structuredClone(config.ignored || {});
   delete ignored[owner];
   return {
     ...config,
@@ -147,9 +148,9 @@ export function removeOwnerMute(
 
 export function removeRepositoryMute(
   config: MuteConfiguration,
-  repo: RepoReference
+  repo: RepoReference,
 ): MuteConfiguration {
-  const ignored = cloneDeep(config.ignored || {});
+  const ignored = structuredClone(config.ignored || {});
   const ownerConfig = ignored[repo.owner];
   if (ownerConfig) {
     switch (ownerConfig.kind) {
@@ -158,7 +159,7 @@ export function removeRepositoryMute(
         break;
       case "ignore-only":
         ownerConfig.repoNames = ownerConfig.repoNames.filter(
-          (repoName) => repoName !== repo.name
+          (repoName) => repoName !== repo.name,
         );
         if (ownerConfig.repoNames.length === 0) {
           delete ignored[repo.owner];
@@ -182,6 +183,7 @@ export type MuteType =
   | "owner";
 
 export interface MutedPullRequest {
+  accountId?: string;
   repo: {
     owner: string;
     name: string;
@@ -240,8 +242,7 @@ export interface MutedForever {
 }
 
 export type IgnoreConfiguration =
-  | IgnoreConfigurationAllRepositories
-  | IgnoreConfigurationSpecificRepositories;
+  IgnoreConfigurationAllRepositories | IgnoreConfigurationSpecificRepositories;
 
 export interface IgnoreConfigurationAllRepositories {
   kind: "ignore-all";

@@ -1,0 +1,14 @@
+{
+  "data": {
+    "repository": {
+      "pullRequest": {
+        "reviewDecision": "REVIEW_REQUIRED",
+        "commits": {
+          "nodes": [
+            { "commit": { "statusCheckRollup": { "state": "SUCCESS" } } }
+          ]
+        }
+      }
+    }
+  }
+}

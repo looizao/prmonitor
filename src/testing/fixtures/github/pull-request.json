@@ -1,0 +1,18 @@
+{
+  "node_id": "PR_fixture_42",
+  "number": 42,
+  "title": "Improve account refresh reliability",
+  "state": "open",
+  "draft": false,
+  "updated_at": "2026-09-11T12:00:00Z",
+  "html_url": "https://github.example.test/engineering/platform/pull/42",
+  "repository_url": "https://github.example.test/api/v3/repos/engineering/platform",
+  "user": { "login": "teammate", "avatar_url": "" },
+  "requested_reviewers": [{ "login": "reviewer" }],
+  "requested_teams": [],
+  "changed_files": 4,
+  "additions": 85,
+  "deletions": 23,
+  "mergeable": true,
+  "head": { "sha": "source-fixture-sha" }
+}

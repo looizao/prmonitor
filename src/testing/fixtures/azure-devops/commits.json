@@ -1,0 +1,9 @@
+{
+  "value": [
+    {
+      "commitId": "source-fixture-sha",
+      "author": { "email": "sam@example.test", "date": "2026-09-11T11:00:00Z" },
+      "committer": { "date": "2026-09-11T11:00:00Z" }
+    }
+  ]
+}

@@ -1,102 +1,66 @@
-import { RecursivePartial } from "../testing/recursive-partial";
-import { ChromeApi, ChromeStorageItems } from "./api";
+import { AccountRepository, ACCOUNTS_KEY } from "../accounts/storage";
+import { AccountService } from "../accounts/service";
+import { handleCommand, type Command } from "../accounts/messages";
+import { fixtureCollection } from "../testing/scenarios";
 
-/**
- * A fake implementation of the Chrome extension API to allow development
- * outside of a Chrome extension.
- */
-const partialFakeChrome: RecursivePartial<ChromeApi> = {
-  action: {
-    setBadgeText(details: chrome.action.BadgeTextDetails) {
-      console.log("chrome.action.setBadgeText", details);
-    },
-    setBadgeBackgroundColor(
-      details: chrome.action.BadgeColorDetails
-    ) {
-      console.log("chrome.action.setBadgeBackgroundColor", details);
-    },
-  },
-  runtime: {
-    // Sending a message won't do anything, but we can at least log it.
-    sendMessage(message: unknown) {
-      console.log("chrome.runtime.sendMessage", message);
-    },
-    onMessage: {
-      addListener(
-        callback: (
-          message: unknown,
-          sender: chrome.runtime.MessageSender,
-          sendResponse: (response?: unknown) => void
-        ) => void
-      ) {
-        console.log("chrome.runtime.onMessage.addListener", callback);
-      },
-    },
-  },
-  notifications: {
-    create(
-      notificationId: string,
-      options: chrome.notifications.NotificationOptions
-    ) {
-      console.log("chrome.notifications.create", notificationId, options);
-    },
-    onClicked: {
-      addListener(callback: (notificationId: string) => void) {
-        console.log("chrome.notifications.onClicked.addListener", callback);
-      },
-    },
-  },
-  permissions: {
-    request(
-      _permissions: chrome.permissions.Permissions,
-      callback?: (granted: boolean) => void
-    ) {
-      if (callback) {
-        callback(true);
-      }
-    },
-    getAll(callback: (permissions: chrome.permissions.Permissions) => void) {
-      callback({});
-    },
-  },
-  storage: {
-    // To simulate chrome.storage.local, we simply fall back to the localStorage API.
-    local: {
-      set(items: ChromeStorageItems, callback?: () => void) {
-        for (const [key, value] of Object.entries(items)) {
-          localStorage.setItem(key, JSON.stringify(value));
-        }
-        if (callback) {
-          callback();
-        }
-      },
-      get(keys: string[], callback: (items: ChromeStorageItems) => void) {
-        callback(
-          keys.reduce<ChromeStorageItems>((acc, key) => {
-            const json = localStorage.getItem(key);
-            acc[key] = json ? JSON.parse(json) : null;
-            return acc;
-          }, {})
+/** Browser-only deterministic development adapter. Excluded from production builds. */
+export function fakeChrome(fixture: string) {
+  const listeners = new Set<() => void>();
+  const values: Record<string, unknown> = {
+    [ACCOUNTS_KEY]: fixtureCollection(fixture),
+  };
+  const service = new AccountService(
+    new AccountRepository({
+      async get(keys) {
+        return structuredClone(
+          Object.fromEntries(keys.map((key) => [key, values[key]])),
         );
       },
+      async set(next) {
+        Object.assign(values, structuredClone(next));
+      },
+      async remove(keys) {
+        keys.forEach((key) => delete values[key]);
+      },
+    }),
+    async (account) => {
+      const state = fixtureCollection("multiple-accounts").data.github.loaded!;
+      return {
+        ...state,
+        accountId: account.id,
+        accountName: account.name,
+        provider: account.provider,
+        openPullRequests: state.openPullRequests.map((pr) => ({
+          ...pr,
+          accountId: account.id,
+          accountName: account.name,
+          provider: account.provider,
+        })),
+      };
     },
-  },
-  tabs: {
-    query(
-      _queryInfo: chrome.tabs.QueryInfo,
-      callback: (result: chrome.tabs.Tab[]) => void
-    ) {
-      callback([]);
+    {
+      hasPermission: async () => true,
+      revokePermission: async () => true,
+      notify: async () => {},
+      clearNotification: async () => {},
+      badge: async () => {},
     },
-    create(properties: chrome.tabs.CreateProperties) {
-      window.open(properties.url);
+  );
+  return {
+    async send(command: Command) {
+      const reply = await handleCommand(service, command);
+      if (command.kind !== "snapshot") listeners.forEach((fn) => fn());
+      return reply;
     },
-  },
-  windows: {
-    update(windowId: number, updateInfo: chrome.windows.UpdateInfo) {
-      console.log("chrome.windows.update", windowId, updateInfo);
+    subscribe(listener: () => void) {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
     },
-  },
-};
-
-export const fakeChrome = partialFakeChrome as ChromeApi;
+    requestPermission: async () => fixture !== "permission-denied",
+    manageAccounts() {
+      window.location.href = `/options.html?fixture=${encodeURIComponent(fixture)}`;
+    },
+  };
+}

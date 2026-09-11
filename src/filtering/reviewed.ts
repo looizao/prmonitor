@@ -5,7 +5,7 @@ import { PullRequest } from "../storage/loaded-state";
  */
 export function userPreviouslyReviewed(
   pr: PullRequest,
-  currentUserLogin: string
+  currentUserLogin: string,
 ): boolean {
   return (
     (pr.comments || []).findIndex((r) => r.authorLogin === currentUserLogin) !==

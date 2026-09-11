@@ -1,4 +1,4 @@
-import { components } from "@octokit/openapi-types";
+import type { RestEndpointMethodTypes } from "@octokit/rest";
 import { GitHubApi } from "../../github-api/api";
 import { mocked } from "../../testing/mocked";
 import { refreshOpenPullRequests } from "./pull-requests";
@@ -15,7 +15,7 @@ describe("refreshOpenPullRequests", () => {
     const githubApi = mockGitHubApi();
     mocked(githubApi.searchPullRequests).mockImplementation(async (query) => {
       const defaultResponse =
-        {} as components["schemas"]["issue-search-result-item"];
+        {} as RestEndpointMethodTypes["search"]["issuesAndPullRequests"]["response"]["data"]["items"][number];
       if (query.startsWith("author:")) {
         return [
           {
@@ -75,7 +75,7 @@ describe("refreshOpenPullRequests", () => {
         ];
       } else {
         throw new Error(
-          `Unknown query: "${query}". Do you need to fix the mock?`
+          `Unknown query: "${query}". Do you need to fix the mock?`,
         );
       }
     });
@@ -83,7 +83,7 @@ describe("refreshOpenPullRequests", () => {
       Promise.resolve({
         requested_reviewers: [],
         requested_teams: [],
-      } as any)
+      } as any),
     );
     mocked(githubApi.loadComments).mockReturnValue(Promise.resolve([]));
     mocked(githubApi.loadReviews).mockReturnValue(Promise.resolve([]));
@@ -91,7 +91,7 @@ describe("refreshOpenPullRequests", () => {
     mocked(githubApi.loadPullRequestStatus).mockReturnValue(
       Promise.resolve({
         reviewDecision: "REVIEW_REQUIRED",
-      })
+      }),
     );
     const result = await refreshOpenPullRequests(githubApi, "fwouts");
     expect(result).toHaveLength(3);
@@ -107,12 +107,12 @@ describe("refreshOpenPullRequests", () => {
 
 function mockGitHubApi(): GitHubApi {
   return {
-    loadAuthenticatedUser: jest.fn(),
-    searchPullRequests: jest.fn(),
-    loadPullRequestDetails: jest.fn(),
-    loadReviews: jest.fn(),
-    loadComments: jest.fn(),
-    loadCommits: jest.fn(),
-    loadPullRequestStatus: jest.fn(),
+    loadAuthenticatedUser: vi.fn(),
+    searchPullRequests: vi.fn(),
+    loadPullRequestDetails: vi.fn(),
+    loadReviews: vi.fn(),
+    loadComments: vi.fn(),
+    loadCommits: vi.fn(),
+    loadPullRequestStatus: vi.fn(),
   };
 }

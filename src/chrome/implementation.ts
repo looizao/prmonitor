@@ -1,21 +1,33 @@
-import { ChromeApi } from "./api";
-import { fakeChrome } from "./fake-chrome";
-
-// This file exists to facilitate development.
-//
-// In its normal running environment, the extension will always have access to
-// the global `chrome` object. However in development, it is much more
-// convenient to be able to build and run pages on their own, outside of the
-// Chrome extension environment.
-//
-// This indirection allows us to do just that.
-
-export let chromeApiSingleton: ChromeApi;
-
-if (!chrome.extension && process.env.NODE_ENV === "development") {
-  // We're developing outside of the Chrome extension environment.
-  // Create a partial fake covering the APIs we need.
-  chromeApiSingleton = fakeChrome;
-} else {
-  chromeApiSingleton = chrome;
+import type { Command, Reply } from "../accounts/messages";
+export interface BrowserClient {
+  send(command: Command): Promise<Reply>;
+  subscribe(listener: () => void): () => void;
+  requestPermission(origins: string[]): Promise<boolean>;
+  manageAccounts(): void;
+}
+export async function browserClient(): Promise<BrowserClient> {
+  if (import.meta.env.DEV && !globalThis.chrome?.runtime?.id) {
+    const { fakeChrome } = await import("./fake-chrome");
+    return fakeChrome(
+      new URLSearchParams(location.search).get("fixture") ?? "no-accounts",
+    );
+  }
+  return {
+    send: (command) => chrome.runtime.sendMessage(command),
+    subscribe(listener) {
+      const onMessage = (message: { kind?: string }) => {
+        if (message.kind === "changed") listener();
+      };
+      chrome.storage.onChanged.addListener(listener);
+      chrome.runtime.onMessage.addListener(onMessage);
+      return () => {
+        chrome.storage.onChanged.removeListener(listener);
+        chrome.runtime.onMessage.removeListener(onMessage);
+      };
+    },
+    requestPermission: (origins) => chrome.permissions.request({ origins }),
+    manageAccounts: () => {
+      void chrome.runtime.openOptionsPage();
+    },
+  };
 }

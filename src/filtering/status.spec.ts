@@ -10,8 +10,8 @@ describe("pullRequestState", () => {
           .seenAs("fwouts")
           .reviewRequested(["fwouts"])
           .build(),
-        "fwouts"
-      )
+        "fwouts",
+      ),
     ).toEqual({
       kind: "incoming",
       draft: false,
@@ -33,8 +33,8 @@ describe("pullRequestState", () => {
           })
           .reviewRequested([], ["team"])
           .build(),
-        "fwouts"
-      )
+        "fwouts",
+      ),
     ).toEqual({
       kind: "incoming",
       draft: false,
@@ -53,8 +53,8 @@ describe("pullRequestState", () => {
           .addComment("fwouts")
           .addComment("kevin")
           .build(),
-        "fwouts"
-      )
+        "fwouts",
+      ),
     ).toEqual({
       kind: "incoming",
       draft: false,
@@ -73,8 +73,8 @@ describe("pullRequestState", () => {
           .addComment("fwouts")
           .addCommit()
           .build(),
-        "fwouts"
-      )
+        "fwouts",
+      ),
     ).toEqual({
       kind: "incoming",
       draft: false,
@@ -94,8 +94,8 @@ describe("pullRequestState", () => {
           .addCommit()
           .addComment("kevin")
           .build(),
-        "fwouts"
-      )
+        "fwouts",
+      ),
     ).toEqual({
       kind: "incoming",
       draft: false,
@@ -113,8 +113,8 @@ describe("pullRequestState", () => {
           .seenAs("fwouts")
           .addComment("fwouts")
           .build(),
-        "fwouts"
-      )
+        "fwouts",
+      ),
     ).toEqual({
       kind: "incoming",
       draft: false,
@@ -132,8 +132,8 @@ describe("pullRequestState", () => {
           .seenAs("fwouts")
           .addReview("fwouts", "CHANGES_REQUESTED")
           .build(),
-        "fwouts"
-      )
+        "fwouts",
+      ),
     ).toEqual({
       kind: "incoming",
       draft: false,
@@ -153,8 +153,8 @@ describe("pullRequestState", () => {
           .seenAs("fwouts")
           .reviewRequested(["dries"])
           .build(),
-        "fwouts"
-      )
+        "fwouts",
+      ),
     ).toEqual({
       kind: "not-involved",
       draft: false,
@@ -171,8 +171,8 @@ describe("pullRequestState", () => {
           })
           .reviewRequested([], ["out-team"])
           .build(),
-        "fwouts"
-      )
+        "fwouts",
+      ),
     ).toEqual({
       kind: "not-involved",
       draft: false,
@@ -183,8 +183,8 @@ describe("pullRequestState", () => {
     expect(
       pullRequestState(
         fakePullRequest().author("fwouts").seenAs("fwouts").build(),
-        "fwouts"
-      )
+        "fwouts",
+      ),
     ).toEqual({
       kind: "outgoing",
       draft: false,
@@ -197,8 +197,8 @@ describe("pullRequestState", () => {
     expect(
       pullRequestState(
         fakePullRequest().author("fwouts").draft().seenAs("fwouts").build(),
-        "fwouts"
-      )
+        "fwouts",
+      ),
     ).toEqual({
       kind: "outgoing",
       draft: true,
@@ -215,8 +215,8 @@ describe("pullRequestState", () => {
           .reviewRequested(["kevin"])
           .seenAs("fwouts")
           .build(),
-        "fwouts"
-      )
+        "fwouts",
+      ),
     ).toEqual({
       kind: "outgoing",
       draft: false,
@@ -237,8 +237,8 @@ describe("pullRequestState", () => {
           .mergeable()
           .seenAs("fwouts")
           .build(),
-        "fwouts"
-      )
+        "fwouts",
+      ),
     ).toEqual({
       kind: "outgoing",
       draft: false,
@@ -259,8 +259,8 @@ describe("pullRequestState", () => {
           .addReview("dries", "APPROVED")
           .seenAs("fwouts")
           .build(),
-        "fwouts"
-      )
+        "fwouts",
+      ),
     ).toEqual({
       kind: "outgoing",
       draft: false,
@@ -281,8 +281,8 @@ describe("pullRequestState", () => {
           .addComment("dries")
           .seenAs("fwouts")
           .build(),
-        "fwouts"
-      )
+        "fwouts",
+      ),
     ).toEqual({
       kind: "outgoing",
       draft: false,
@@ -303,8 +303,8 @@ describe("pullRequestState", () => {
           .addReview("dries", "COMMENTED")
           .seenAs("fwouts")
           .build(),
-        "fwouts"
-      )
+        "fwouts",
+      ),
     ).toEqual({
       kind: "outgoing",
       draft: false,

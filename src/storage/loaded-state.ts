@@ -40,6 +40,7 @@ export interface Repo {
 
 export function ref(pullRequest: PullRequest): PullRequestReference {
   return {
+    accountId: pullRequest.accountId,
     repo: {
       owner: pullRequest.repoOwner,
       name: pullRequest.repoName,
@@ -49,6 +50,10 @@ export function ref(pullRequest: PullRequest): PullRequestReference {
 }
 
 export interface PullRequest {
+  accountId: string;
+  accountName: string;
+  provider: "github" | "azure-devops";
+  currentUserLogin: string;
   nodeId: string;
   htmlUrl: string;
   repoOwner: string;
@@ -59,7 +64,7 @@ export interface PullRequest {
     login: string;
     avatarUrl: string;
   } | null;
-  changeSummary: {
+  changeSummary?: {
     changedFiles: number;
     additions: number;
     deletions: number;
@@ -94,6 +99,8 @@ export interface Review {
   authorLogin: string;
   state: ReviewState;
   submittedAt?: string;
+  /** Local baseline for providers that expose votes without timestamps. */
+  observedAt?: number;
 }
 
 export interface Commit {
@@ -102,7 +109,4 @@ export interface Commit {
 }
 
 export type ReviewState =
-  | "PENDING"
-  | "COMMENTED"
-  | "CHANGES_REQUESTED"
-  | "APPROVED";
+  "PENDING" | "COMMENTED" | "CHANGES_REQUESTED" | "APPROVED";

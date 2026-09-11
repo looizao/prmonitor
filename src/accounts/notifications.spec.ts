@@ -1,0 +1,22 @@
+import { openNotification } from "./notifications";
+import { AccountRepository, ACCOUNTS_KEY } from "./storage";
+import { MemoryStorage } from "../testing/memory-storage";
+import { fixtureCollection } from "../testing/scenarios";
+import { notificationKey } from "./model";
+it("opens the persisted provider-specific notification target after restart", async () => {
+  const c = fixtureCollection("multiple-accounts");
+  const pr = c.data.azure.loaded!.openPullRequests[0];
+  const key = notificationKey(pr);
+  c.data.azure.notificationTargets[key] = pr.htmlUrl;
+  const storage = new MemoryStorage({ [ACCOUNTS_KEY]: c });
+  const open = vi.fn(async () => {});
+  const clear = vi.fn(async () => {});
+  await openNotification(new AccountRepository(storage), key, open, clear);
+  expect(open).toHaveBeenCalledWith(pr.htmlUrl);
+  expect(clear).toHaveBeenCalledWith(key);
+  delete c.data.azure;
+  await storage.set({ [ACCOUNTS_KEY]: c });
+  open.mockClear();
+  await openNotification(new AccountRepository(storage), key, open, clear);
+  expect(open).not.toHaveBeenCalled();
+});

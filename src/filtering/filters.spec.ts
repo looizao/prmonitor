@@ -26,8 +26,8 @@ describe("filters (incoming)", () => {
           .author("fwouts")
           .seenAs("fwouts")
           .reviewRequested(["kevin", "fwouts"])
-          .build()
-      )
+          .build(),
+      ),
     ).toEqual([Filter.MINE]);
   });
   it("is NOTHING when the user is not a reviewer and hasn't commented", () => {
@@ -41,8 +41,8 @@ describe("filters (incoming)", () => {
           .author("fwouts")
           .seenAs("kevin")
           .reviewRequested([])
-          .build()
-      )
+          .build(),
+      ),
     ).toEqual([]);
   });
   it("is INCOMING when the user is a reviewer and hasn't reviewed or commented", () => {
@@ -56,8 +56,8 @@ describe("filters (incoming)", () => {
           .author("fwouts")
           .seenAs("kevin")
           .reviewRequested(["kevin"])
-          .build()
-      )
+          .build(),
+      ),
     ).toEqual([Filter.INCOMING]);
   });
   it("is INCOMING when the user is in a reviewer team and hasn't reviewed or commented", () => {
@@ -74,8 +74,8 @@ describe("filters (incoming)", () => {
             team: ["kevin"],
           })
           .reviewRequested([], ["team"])
-          .build()
-      )
+          .build(),
+      ),
     ).toEqual([Filter.INCOMING]);
   });
   it("is NOTHING when the user is in a reviewer team, but only wants whitelisted teams", () => {
@@ -92,8 +92,8 @@ describe("filters (incoming)", () => {
             team: ["kevin"],
           })
           .reviewRequested([], ["team"])
-          .build()
-      )
+          .build(),
+      ),
     ).toEqual([]);
   });
   it("is INCOMING when the user is in a reviewer team, but only wants whitelisted teams", () => {
@@ -111,8 +111,8 @@ describe("filters (incoming)", () => {
             "whitelisted-team": ["kevin"],
           })
           .reviewRequested([], ["whitelisted-team"])
-          .build()
-      )
+          .build(),
+      ),
     ).toEqual([Filter.INCOMING]);
   });
   it("is INCOMING when the user is not a reviewer but had reviewed, and the author responds", () => {
@@ -127,8 +127,8 @@ describe("filters (incoming)", () => {
           .seenAs("kevin")
           .addReview("kevin", "COMMENTED")
           .addComment("fwouts")
-          .build()
-      )
+          .build(),
+      ),
     ).toEqual([Filter.INCOMING]);
   });
   it("is INCOMING when the user is not a reviewer but had commented, and the author responds", () => {
@@ -143,8 +143,8 @@ describe("filters (incoming)", () => {
           .seenAs("kevin")
           .addComment("kevin")
           .addComment("fwouts")
-          .build()
-      )
+          .build(),
+      ),
     ).toEqual([Filter.INCOMING]);
   });
   it("is REVIEWED when the user has reviewed and the author hasn't responded", () => {
@@ -158,8 +158,8 @@ describe("filters (incoming)", () => {
           .author("fwouts")
           .seenAs("kevin")
           .addComment("kevin")
-          .build()
-      )
+          .build(),
+      ),
     ).toEqual([Filter.REVIEWED]);
   });
   it("is REVIEWED when the user is a reviewer, has commented and the author hasn't responded", () => {
@@ -176,8 +176,8 @@ describe("filters (incoming)", () => {
           .addComment("kevin")
           // Another user posted a review.
           .addReview("dries", "CHANGES_REQUESTED")
-          .build()
-      )
+          .build(),
+      ),
     ).toEqual([Filter.REVIEWED]);
   });
   it("is INCOMING when the author responded with a comment", () => {
@@ -192,8 +192,8 @@ describe("filters (incoming)", () => {
           .seenAs("kevin")
           .addComment("kevin")
           .addComment("fwouts")
-          .build()
-      )
+          .build(),
+      ),
     ).toEqual([Filter.INCOMING]);
   });
   it("is INCOMING when the author responded with a review", () => {
@@ -208,8 +208,8 @@ describe("filters (incoming)", () => {
           .seenAs("kevin")
           .addComment("kevin")
           .addReview("fwouts", "COMMENTED")
-          .build()
-      )
+          .build(),
+      ),
     ).toEqual([Filter.INCOMING]);
   });
   it("is INCOMING when the PR was previously reviewed but the author responded", () => {
@@ -224,8 +224,8 @@ describe("filters (incoming)", () => {
           .seenAs("kevin")
           .addReview("kevin", "CHANGES_REQUESTED")
           .addComment("fwouts")
-          .build()
-      )
+          .build(),
+      ),
     ).toEqual([Filter.INCOMING]);
   });
   it("is INCOMING when the PR was approved but the author responded", () => {
@@ -240,8 +240,8 @@ describe("filters (incoming)", () => {
           .seenAs("kevin")
           .addReview("kevin", "APPROVED")
           .addComment("fwouts")
-          .build()
-      )
+          .build(),
+      ),
     ).toEqual([Filter.INCOMING]);
   });
   it("is still INCOMING when there are pending review comments", () => {
@@ -256,8 +256,8 @@ describe("filters (incoming)", () => {
           .seenAs("kevin")
           .reviewRequested(["kevin"])
           .addReview("kevin", "PENDING")
-          .build()
-      )
+          .build(),
+      ),
     ).toEqual([Filter.INCOMING]);
   });
   it("is still INCOMING when there are pending review comments, and reviewer in reviewer team", () => {
@@ -275,8 +275,8 @@ describe("filters (incoming)", () => {
           })
           .reviewRequested([], ["team"])
           .addReview("kevin", "PENDING")
-          .build()
-      )
+          .build(),
+      ),
     ).toEqual([Filter.INCOMING]);
   });
   it("is MUTED when the PR is muted until next update and the author did not add new comments or reviews [reviewer-direct-requested]", () => {
@@ -306,8 +306,8 @@ describe("filters (incoming)", () => {
           .reviewRequested(["kevin"])
           // Another user posted a review after we muted.
           .addReview("dries", "CHANGES_REQUESTED", 200)
-          .build()
-      )
+          .build(),
+      ),
     ).toEqual([Filter.MUTED]);
   });
   it("is MUTED when the PR is muted until next comment and the author added commits but did not add new comments or reviews [reviewer-team-requested]", () => {
@@ -339,8 +339,8 @@ describe("filters (incoming)", () => {
           })
           .reviewRequested([], ["team"])
           .addCommit(300)
-          .build()
-      )
+          .build(),
+      ),
     ).toEqual([Filter.MUTED]);
   });
   it("is MUTED when the PR is muted until not draft and the PR is still a draft", () => {
@@ -368,8 +368,8 @@ describe("filters (incoming)", () => {
           .author("fwouts")
           .seenAs("kevin")
           .reviewRequested(["kevin"])
-          .build()
-      )
+          .build(),
+      ),
     ).toEqual([Filter.MUTED]);
   });
   it("is MUTED when the PR is muted until a specific time that hasn't been reached yet", () => {
@@ -398,8 +398,8 @@ describe("filters (incoming)", () => {
           .author("fwouts")
           .seenAs("kevin")
           .reviewRequested(["kevin"])
-          .build()
-      )
+          .build(),
+      ),
     ).toEqual([Filter.MUTED]);
   });
   it("is INCOMING when the PR is muted until a specific time that has been reached and the PR needs review", () => {
@@ -428,8 +428,8 @@ describe("filters (incoming)", () => {
           .author("fwouts")
           .seenAs("kevin")
           .reviewRequested(["kevin"])
-          .build()
-      )
+          .build(),
+      ),
     ).toEqual([Filter.INCOMING]);
   });
   it("is REVIEWED when the PR is muted until a specific time that has been reached but the PR has been reviewed", () => {
@@ -458,8 +458,8 @@ describe("filters (incoming)", () => {
           .author("fwouts")
           .seenAs("kevin")
           .addComment("kevin")
-          .build()
-      )
+          .build(),
+      ),
     ).toEqual([Filter.REVIEWED]);
   });
   it("is MUTED when the PR is muted forever and the PR needs review", () => {
@@ -486,8 +486,8 @@ describe("filters (incoming)", () => {
           .author("fwouts")
           .seenAs("kevin")
           .reviewRequested(["kevin"])
-          .build()
-      )
+          .build(),
+      ),
     ).toEqual([Filter.MUTED]);
   });
   it("is REVIEWED when the PR is muted forever and the PR has been reviewed", () => {
@@ -514,8 +514,8 @@ describe("filters (incoming)", () => {
           .author("fwouts")
           .seenAs("kevin")
           .addComment("kevin")
-          .build()
-      )
+          .build(),
+      ),
     ).toEqual([Filter.REVIEWED]);
   });
   it("is IGNORED when the PR belongs to an owner that is ignored", () => {
@@ -537,8 +537,8 @@ describe("filters (incoming)", () => {
           .author("fwouts")
           .seenAs("kevin")
           .reviewRequested(["kevin"])
-          .build()
-      )
+          .build(),
+      ),
     ).toEqual([Filter.IGNORED]);
   });
   it("is IGNORED when the PR belongs to a repository that is ignored", () => {
@@ -561,8 +561,8 @@ describe("filters (incoming)", () => {
           .author("fwouts")
           .seenAs("kevin")
           .reviewRequested(["kevin"])
-          .build()
-      )
+          .build(),
+      ),
     ).toEqual([Filter.IGNORED]);
   });
   it("is INCOMING when the PR was muted until next update but the author added comments since muting", () => {
@@ -592,8 +592,8 @@ describe("filters (incoming)", () => {
           .seenAs("kevin")
           .reviewRequested(["kevin"])
           .addComment("fwouts", 200)
-          .build()
-      )
+          .build(),
+      ),
     ).toEqual([Filter.INCOMING]);
   });
   it("is INCOMING when the PR was muted until next update but the author added commits since muting", () => {
@@ -623,8 +623,8 @@ describe("filters (incoming)", () => {
           .seenAs("kevin")
           .reviewRequested(["kevin"])
           .addCommit(200)
-          .build()
-      )
+          .build(),
+      ),
     ).toEqual([Filter.INCOMING]);
   });
   it("is INCOMING when the PR was muted until next comment but the author added comments since muting", () => {
@@ -654,8 +654,8 @@ describe("filters (incoming)", () => {
           .seenAs("kevin")
           .reviewRequested(["kevin"])
           .addComment("fwouts", 200)
-          .build()
-      )
+          .build(),
+      ),
     ).toEqual([Filter.INCOMING]);
   });
   it("is INCOMING when the PR was muted until not draft and the PR is no longer a draft", () => {
@@ -682,8 +682,8 @@ describe("filters (incoming)", () => {
           .author("fwouts")
           .seenAs("kevin")
           .reviewRequested(["kevin"])
-          .build()
-      )
+          .build(),
+      ),
     ).toEqual([Filter.INCOMING]);
   });
   it("is INCOMING for a PR that needs review when an unrelated PR is muted", () => {
@@ -712,8 +712,8 @@ describe("filters (incoming)", () => {
           .author("fwouts")
           .seenAs("kevin")
           .reviewRequested(["kevin"])
-          .build()
-      )
+          .build(),
+      ),
     ).toEqual([Filter.INCOMING]);
   });
 });

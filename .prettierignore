@@ -1,0 +1,9 @@
+node_modules
+dist
+pnpm-lock.yaml
+playwright-report
+test-results
+ENGINEERING_REVAMP_PLAN.md
+screenshots
+screencasts
+logo

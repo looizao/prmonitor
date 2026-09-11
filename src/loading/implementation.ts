@@ -1,22 +1,33 @@
-import { getLastUpdateTimestamp } from "../filtering/timestamps";
+import type {
+  AccountConfig,
+  AccountLoadedState,
+  AccountLoader,
+} from "../accounts/model";
 import { buildGitHubApi } from "../github-api/implementation";
-import { LoadedState } from "../storage/loaded-state";
-import { GitHubLoader } from "./api";
 import { refreshOpenPullRequests } from "./internal/pull-requests";
+import { loadAzureDevOpsAccount } from "../providers/azure";
 
-export function buildGitHubLoader(): GitHubLoader {
-  return load;
-}
-
-async function load(token: string): Promise<LoadedState> {
-  const githubApi = buildGitHubApi(token);
-  const user = await githubApi.loadAuthenticatedUser();
-  const openPullRequests = await refreshOpenPullRequests(githubApi, user.login);
-  const sorted = [...openPullRequests].sort((a, b) => {
-    return getLastUpdateTimestamp(b) - getLastUpdateTimestamp(a);
-  });
+export async function loadGitHubAccount(
+  account: Extract<AccountConfig, { provider: "github" }>,
+  fetcher: typeof fetch = fetch,
+): Promise<AccountLoadedState> {
+  const api = buildGitHubApi(account.token, account.serverUrl, fetcher);
+  const user = await api.loadAuthenticatedUser();
   return {
+    accountId: account.id,
+    accountName: account.name,
+    provider: account.provider,
     userLogin: user.login,
-    openPullRequests: sorted,
+    userDisplayName: user.name ?? undefined,
+    openPullRequests: await refreshOpenPullRequests(api, user.login, account),
+    lastSuccessfulRefresh: Date.now(),
   };
+}
+export function buildAccountLoader(
+  fetcher: typeof fetch = fetch,
+): AccountLoader {
+  return (account) =>
+    account.provider === "github"
+      ? loadGitHubAccount(account, fetcher)
+      : loadAzureDevOpsAccount(account, fetcher);
 }

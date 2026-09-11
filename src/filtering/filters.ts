@@ -42,10 +42,10 @@ export function filterPullRequests(
   context: Context,
   userLogin: string,
   openPullRequests: PullRequest[],
-  muteConfiguration: MuteConfiguration
+  muteConfiguration: MuteConfiguration,
 ): FilteredPullRequests {
   const enrichedPullRequests = openPullRequests.map((pr) => ({
-    state: pullRequestState(pr, userLogin),
+    state: pullRequestState(pr, pr.currentUserLogin || userLogin),
     ...pr,
   }));
   const notifyNewCommits = !!muteConfiguration.notifyNewCommits;
@@ -58,8 +58,8 @@ export function filterPullRequests(
           pr.state,
           notifyNewCommits,
           onlyDirectRequests,
-          whitelistedTeams
-        ) && isMuted(context, pr, muteConfiguration) === MutedResult.VISIBLE
+          whitelistedTeams,
+        ) && isMuted(context, pr, muteConfiguration) === MutedResult.VISIBLE,
     ),
     muted: enrichedPullRequests.filter(
       (pr) =>
@@ -67,19 +67,21 @@ export function filterPullRequests(
           pr.state,
           notifyNewCommits,
           onlyDirectRequests,
-          whitelistedTeams
-        ) && isMuted(context, pr, muteConfiguration) === MutedResult.MUTED
+          whitelistedTeams,
+        ) && isMuted(context, pr, muteConfiguration) === MutedResult.MUTED,
     ),
     reviewed: enrichedPullRequests.filter(
       (pr) =>
         pr.state.kind === "incoming" &&
         !pr.state.newReviewRequested &&
         (!pr.state.newCommit || !notifyNewCommits) &&
-        !pr.state.authorResponded
+        !pr.state.authorResponded,
     ),
-    mine: enrichedPullRequests.filter((pr) => pr.author?.login === userLogin),
+    mine: enrichedPullRequests.filter(
+      (pr) => pr.author?.login === (pr.currentUserLogin || userLogin),
+    ),
     ignored: enrichedPullRequests.filter(
-      (pr) => isMuted(context, pr, muteConfiguration) === MutedResult.INVISIBLE
+      (pr) => isMuted(context, pr, muteConfiguration) === MutedResult.INVISIBLE,
     ),
   };
 }

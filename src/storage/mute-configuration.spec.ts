@@ -198,8 +198,8 @@ describe("MuteConfiguration", () => {
             ],
             ignored: {},
           },
-          PR
-        )
+          PR,
+        ),
       ).toEqual({
         mutedPullRequests: [
           {
@@ -248,8 +248,8 @@ describe("MuteConfiguration", () => {
               },
             },
           },
-          "zenclabs"
-        )
+          "zenclabs",
+        ),
       ).toEqual({
         mutedPullRequests: [],
         ignored: {
@@ -276,8 +276,8 @@ describe("MuteConfiguration", () => {
               },
             },
           },
-          "zenclabs"
-        )
+          "zenclabs",
+        ),
       ).toEqual({
         mutedPullRequests: [],
         ignored: {
@@ -294,8 +294,8 @@ describe("MuteConfiguration", () => {
           {
             mutedPullRequests: [],
           },
-          "zenclabs"
-        )
+          "zenclabs",
+        ),
       ).toEqual({
         mutedPullRequests: [],
         ignored: {},
@@ -320,8 +320,8 @@ describe("MuteConfiguration", () => {
               },
             },
           },
-          REPO
-        )
+          REPO,
+        ),
       ).toEqual({
         mutedPullRequests: [],
         ignored: {
@@ -348,8 +348,8 @@ describe("MuteConfiguration", () => {
               },
             },
           },
-          REPO
-        )
+          REPO,
+        ),
       ).toEqual({
         mutedPullRequests: [],
         ignored: {
@@ -375,8 +375,8 @@ describe("MuteConfiguration", () => {
               },
             },
           },
-          REPO
-        )
+          REPO,
+        ),
       ).toEqual({
         mutedPullRequests: [],
         ignored: {
@@ -393,8 +393,8 @@ describe("MuteConfiguration", () => {
           {
             mutedPullRequests: [],
           },
-          REPO
-        )
+          REPO,
+        ),
       ).toEqual({
         mutedPullRequests: [],
         ignored: {},

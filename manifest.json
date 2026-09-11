@@ -2,20 +2,31 @@
   "manifest_version": 3,
   "name": "PR Monitor",
   "version": "0.0.0",
-  "description": "Get notified when you receive a pull request on GitHub.",
-  "permissions": ["alarms", "notifications", "storage"],
-  "optional_permissions": ["tabs"],
+  "description": "Monitor pull requests across GitHub and Azure DevOps accounts.",
+  "permissions": [
+    "alarms",
+    "notifications",
+    "storage"
+  ],
   "background": {
     "service_worker": "background.js",
     "type": "module"
   },
   "action": {
-    "default_popup": "index.html#popup"
+    "default_popup": "popup.html"
   },
   "icons": {
     "48": "images/logo48.png",
     "96": "images/logo96.png",
     "128": "images/logo128.png",
     "256": "images/logo256.png"
+  },
+  "optional_host_permissions": [
+    "https://*/*",
+    "http://*/*"
+  ],
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
   }
 }

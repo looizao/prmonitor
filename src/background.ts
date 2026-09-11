@@ -1,92 +1,66 @@
-import { ChromeApi } from "./chrome/api";
-import { chromeApiSingleton } from "./chrome/implementation";
-import { Context } from "./environment/api";
-import { buildEnvironment } from "./environment/implementation";
-import { CrossScriptMessenger } from "./messaging/api";
-import { Core } from "./state/core";
+import { AccountRepository } from "./accounts/storage";
+import { AccountService } from "./accounts/service";
+import { handleCommand, type Command } from "./accounts/messages";
+import { buildAccountLoader } from "./loading/implementation";
+import { openNotification } from "./accounts/notifications";
 
-// This is the entry point of the background script of the Chrome extension.
-console.debug("Background entry point running...");
-const chromeApi = chromeApiSingleton;
-const env = buildEnvironment(chromeApiSingleton);
-setUpBackgroundScript(chromeApi, env);
-
-let refreshing = false;
-
-function setUpBackgroundScript(chromeApi: ChromeApi, context: Context) {
-  selfUpdateAsap(chromeApi);
-  refreshOnUpdate(chromeApi, triggerRefresh);
-  refreshRegulary(chromeApi, triggerRefresh);
-  refreshOnDemand(context.messenger, triggerRefresh);
-  const core = new Core(context);
-
-  async function triggerRefresh() {
-    if (refreshing) {
-      return;
-    }
-    try {
-      refreshing = true;
-      await core.load();
-      if (!core.token) {
-        return;
-      }
-      await core.refreshPullRequests();
-    } finally {
-      refreshing = false;
-    }
-  }
-}
-
-/**
- * Automatically reloads the extension as soon as an update is available.
- */
-function selfUpdateAsap(chromeApi: ChromeApi) {
-  chromeApi.runtime.onUpdateAvailable.addListener(() => {
-    console.debug("Update available");
-    chrome.runtime.reload();
-  });
-}
-
-/**
- * Refreshes pull requests when the extension is installed or updated.
- */
-function refreshOnUpdate(
-  chromeApi: ChromeApi,
-  triggerRefresh: () => Promise<void>
-) {
-  chromeApi.runtime.onInstalled.addListener(() => {
-    console.debug("Extension installed");
-    triggerRefresh().catch(console.error);
-  });
-}
-
-/**
- * Refreshes pull requests at regular intervals.
- */
-function refreshRegulary(
-  chromeApi: ChromeApi,
-  triggerRefresh: () => Promise<void>
-) {
-  chromeApi.alarms.create({
-    periodInMinutes: 3,
-  });
-  chromeApi.alarms.onAlarm.addListener((alarm) => {
-    console.debug("Alarm triggered", alarm);
-    triggerRefresh().catch(console.error);
-  });
-}
-
-/**
- * Refreshes pull requests when requested by the user (e.g. after entering a new token).
- */
-function refreshOnDemand(
-  messenger: CrossScriptMessenger,
-  triggerRefresh: () => Promise<void>
-) {
-  messenger.listen((message) => {
-    console.debug("Message received", message);
-    if (message.kind === "refresh") {
-      triggerRefresh().catch(console.error);
-    }
-  });
-}
+const repository = new AccountRepository(chrome.storage.local);
+const service = new AccountService(repository, buildAccountLoader(), {
+  isOnline: () => navigator.onLine,
+  hasPermission: (origins) => chrome.permissions.contains({ origins }),
+  revokePermission: (origins) => chrome.permissions.remove({ origins }),
+  notify: (id, title, message) =>
+    chrome.notifications.create(id, {
+      type: "basic",
+      iconUrl: "images/logo128.png",
+      title,
+      message,
+    }),
+  clearNotification: (id) => chrome.notifications.clear(id),
+  changed() {
+    void chrome.runtime.sendMessage({ kind: "changed" }).catch(() => {});
+  },
+  async badge(text, error) {
+    await chrome.action.setBadgeText({ text });
+    await chrome.action.setBadgeBackgroundColor({
+      color: error ? "#b42318" : "#295bd6",
+    });
+  },
+});
+const ready = service.rememberOrigins();
+// Register all events synchronously so suspended workers receive their wake-up event.
+chrome.runtime.onMessage.addListener((command: Command, sender, respond) => {
+  if (
+    sender.id !== chrome.runtime.id ||
+    !sender.url?.startsWith(`chrome-extension://${chrome.runtime.id}/`)
+  )
+    return false;
+  void ready
+    .then(() => handleCommand(service, command))
+    .then(respond, () =>
+      respond({ ok: false, error: "Browser storage unavailable" }),
+    );
+  return true;
+});
+const refresh = () => {
+  void ready
+    .then(() => service.refresh())
+    .catch(() => {
+      /* Retry on the next alarm. No raw exceptions or credentials in logs. */
+    });
+};
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === "refresh") refresh();
+});
+chrome.runtime.onInstalled.addListener(refresh);
+chrome.runtime.onStartup.addListener(refresh);
+chrome.runtime.onUpdateAvailable.addListener(() => chrome.runtime.reload());
+chrome.notifications.onClicked.addListener((id) => {
+  void openNotification(
+    repository,
+    id,
+    (url) => chrome.tabs.create({ url }),
+    (key) => chrome.notifications.clear(key),
+  ).catch(() => {});
+});
+void chrome.alarms.create("refresh", { periodInMinutes: 3 });

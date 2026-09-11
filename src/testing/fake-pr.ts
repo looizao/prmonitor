@@ -80,7 +80,7 @@ class FakePullRequestBuilder {
 
   addReview(login: string, state: ReviewState, timestamp?: number) {
     this._reviewerLogins = this._reviewerLogins.filter(
-      (reviewer) => reviewer !== login
+      (reviewer) => reviewer !== login,
     );
     this._reviews.push({
       authorLogin: login,
@@ -106,6 +106,10 @@ class FakePullRequestBuilder {
     const reviewRequested =
       this._reviewerLogins.includes(this._seenAs) || reviewTeamRequested;
     return {
+      accountId: this._ref.accountId ?? "legacy-github",
+      accountName: "Test",
+      provider: "github",
+      currentUserLogin: this._seenAs,
       author: {
         login: this._author,
         avatarUrl: "",

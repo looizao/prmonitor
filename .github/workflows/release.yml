@@ -1,37 +1,35 @@
 name: Release
-
 on:
   push:
-    tags:
-      - "v*"
-
+    tags: ["v*"]
+permissions:
+  contents: read
 jobs:
   build-release:
-    name: Build Release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "yarn"
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Build extension
-        run: yarn build
-
-      - name: Update manifest version
-        run: sed -e "s/0\.0\.0/${GITHUB_REF#refs/tags/v}/" manifest.json > dist/manifest.json
-
-      - name: Package extension
-        run: cd dist && zip extension.zip -r *
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+          node-version: "22.12.0"
+      - run: npm install --global corepack@0.34.0
+      - run: corepack enable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.12.0"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm qa:autonomous
+      - run: pnpm package
+      - uses: actions/upload-artifact@v4
         with:
           name: extension
-          path: dist/extension.zip
+          path: pr-monitor-*.zip
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-test-results
+          path: |
+            playwright-report/
+            test-results/

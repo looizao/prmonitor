@@ -12,7 +12,7 @@ import {
  */
 export function pullRequestState(
   pr: PullRequest,
-  currentUserLogin: string
+  currentUserLogin: string,
 ): PullRequestState {
   if (pr.author?.login === currentUserLogin) {
     return outgoingPullRequestState(pr, currentUserLogin);
@@ -28,23 +28,36 @@ export function pullRequestState(
 
 function incomingPullRequestState(
   pr: PullRequest,
-  currentUserLogin: string
+  currentUserLogin: string,
 ): PullRequestState {
   const lastReviewOrCommentFromCurrentUser = getLastReviewOrCommentTimestamp(
     pr,
-    currentUserLogin
+    currentUserLogin,
   );
   const hasNewCommentByAuthor =
     lastReviewOrCommentFromCurrentUser < getLastAuthorCommentTimestamp(pr);
   const hasNewCommit =
     lastReviewOrCommentFromCurrentUser < getLastCommitTimestamp(pr);
-  const hasReviewed = lastReviewOrCommentFromCurrentUser > 0;
+  const hasReviewed =
+    lastReviewOrCommentFromCurrentUser > 0 ||
+    (pr.provider === "azure-devops" &&
+      pr.reviews.some(
+        (r) => r.authorLogin === currentUserLogin && r.state !== "PENDING",
+      ));
   return {
     kind: "incoming",
     draft: pr.draft === true,
     newReviewRequested: !hasReviewed,
-    authorResponded: hasReviewed && hasNewCommentByAuthor,
-    newCommit: hasReviewed && hasNewCommit,
+    authorResponded:
+      hasReviewed &&
+      hasNewCommentByAuthor &&
+      (pr.provider !== "azure-devops" ||
+        lastReviewOrCommentFromCurrentUser > 0),
+    newCommit:
+      hasReviewed &&
+      hasNewCommit &&
+      (pr.provider !== "azure-devops" ||
+        lastReviewOrCommentFromCurrentUser > 0),
     directlyAdded: (pr.requestedReviewers || []).includes(currentUserLogin),
     teams: pr.requestedTeams || [],
     checkStatus: pr.checkStatus,
@@ -53,24 +66,28 @@ function incomingPullRequestState(
 
 function outgoingPullRequestState(
   pr: PullRequest,
-  currentUserLogin: string
+  currentUserLogin: string,
 ): PullRequestState {
   const lastReviewOrCommentFromCurrentUserTimestamp =
     getLastReviewOrCommentTimestamp(pr, currentUserLogin);
   const lastCommitTimestamp = getLastCommitTimestamp(pr);
   const lastActionByCurrentUserTimestamp = Math.max(
     lastReviewOrCommentFromCurrentUserTimestamp,
-    lastCommitTimestamp
+    lastCommitTimestamp,
   );
   const stateByUser = new Map<string, ReviewState>();
 
   // Keep track of the last known state of reviews left by others.
   for (const review of pr.reviews) {
-    if (review.authorLogin === currentUserLogin || !review.submittedAt) {
+    if (
+      review.authorLogin === currentUserLogin ||
+      (!review.submittedAt && pr.provider !== "azure-devops")
+    ) {
       continue;
     }
-    const submittedAt = new Date(review.submittedAt).getTime();
+    const submittedAt = new Date(review.submittedAt || 0).getTime();
     if (
+      pr.provider !== "azure-devops" &&
       submittedAt < lastActionByCurrentUserTimestamp &&
       review.state === "CHANGES_REQUESTED"
     ) {
@@ -219,7 +236,7 @@ export function isReviewRequired(
   state: PullRequestState,
   notifyNewCommits: boolean,
   onlyDirectRequests: boolean,
-  whitelistedTeams: string[]
+  whitelistedTeams: string[],
 ) {
   const inWhitelistedTeams =
     state.kind === "incoming" &&

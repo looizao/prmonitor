@@ -1,0 +1,21 @@
+{
+  "pullRequestId": 42,
+  "title": "Simplify project onboarding",
+  "creationDate": "2026-09-10T10:00:00Z",
+  "isDraft": false,
+  "mergeStatus": "succeeded",
+  "repository": {
+    "id": "repo-platform",
+    "name": "platform",
+    "project": { "id": "project-engineering", "name": "Engineering" }
+  },
+  "createdBy": {
+    "id": "user-author",
+    "displayName": "Sam Author",
+    "uniqueName": "sam@example.test"
+  },
+  "reviewers": [
+    { "id": "user-reviewer", "displayName": "Alex Reviewer", "vote": 0 }
+  ],
+  "lastMergeSourceCommit": { "commitId": "source-fixture-sha" }
+}

@@ -1,0 +1,7 @@
+{
+  "authenticatedUser": {
+    "id": "user-reviewer",
+    "displayName": "Alex Reviewer",
+    "uniqueName": "reviewer@example.test"
+  }
+}

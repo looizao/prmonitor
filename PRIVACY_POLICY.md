@@ -1,27 +1,23 @@
 # Privacy Policy
 
-## Who we are
+## Data stored on your device
 
-PR Monitor is made by Zenc Labs Pty Ltd, a Sydney-based company focused on building developer tools. We strive to protect your privacy and collect as little data about you as needed to conduct our business.
+PR Monitor stores each configured account’s name, provider, server or organization URL, and personal access token in extension-local browser storage (`chrome.storage.local`). It also stores authenticated identity information, cached pull-request metadata, refresh times, sanitized errors, mute/ignore rules, notification preferences, notification history, and notification click-target URLs.
 
-## What this privacy policy covers
+Multiple credentials may be saved. This storage is local to the browser profile and is not synchronized by PR Monitor. It is not equivalent to an operating-system secret store. Someone who can access your browser profile may be able to read its contents.
 
-This Privacy Policy applies to information that we collect about you when you use the PR Monitor website, application or browser extension.
+## Provider requests
 
-Throughout this Privacy Policy we’ll refer to our websites, applications, and other products and services collectively as “Services”.
+PR Monitor sends authenticated requests to the GitHub, GitHub Enterprise Server, Azure DevOps Services, or Azure DevOps Server endpoints you configure. GitHub.com uses its associated `api.github.com` endpoint. Credentials are used only for the configured provider and are not sent to a PR Monitor service, analytics provider, or other third party. Credentialed redirects and pagination to unexpected destinations are rejected.
 
-## Information we collect
+HTTP self-hosted servers are supported when explicitly configured. HTTP does not encrypt credentials in transit; use HTTPS when available. Browser host permissions are requested for the configured hosts during account setup or connection testing. PR Monitor does not request permanent access to all websites.
 
-The authentication token you provide, either directly (e.g. via form input) or indirectly (e.g. by signing in to PR Monitor with GitHub) is stored in your local browser.
+## Display and notifications
 
-Our Services also locally cache information fetched using this authentication token, such as the list of pull requests and so on, to provide a snappy experience and reduce your network usage.
+PR titles, repository information, and account names may appear in the popup and operating-system notifications. Opening a PR or repository link navigates your browser to that provider. Saved tokens are masked in account forms and are not included in UI responses, provider error messages, logs, analytics, or telemetry. PR Monitor does not collect analytics or telemetry.
 
-## Sharing information
+## Removal and migration
 
-We do not share your personal information with marketers or unaffiliated third parties. Your authentication token is securely communicated with GitHub for the sole purpose of fetching the data required to operate PR Monitor.
+Removing an account deletes its saved credential, cached PRs, notification history, and account-specific mute and ignore rules. Host access is revoked when practical if no remaining account uses it. Removing the extension deletes its extension storage through the browser’s extension-removal process.
 
-## Contact details
-
-Zenc Labs Pty Ltd, Unit 6, 23 Hunt Street, North Parramatta NSW 2151, Australia
-
-For any privacy-related request, you can contact us at the following email address: [privacy@zenc.io](mailto:privacy@zenc.io).
+When upgrading from the legacy single-token version, PR Monitor migrates compatible credentials, cached state, and rules locally. The legacy credential is retired only after the new account data is successfully saved. No migration data is sent to another service.

@@ -1,0 +1,16 @@
+{
+  "value": [
+    {
+      "id": 1,
+      "publishedDate": "2026-09-10T11:00:00Z",
+      "lastUpdatedDate": "2026-09-11T12:00:00Z",
+      "comments": [
+        {
+          "author": { "id": "user-author", "displayName": "Sam Author" },
+          "publishedDate": "2026-09-11T12:00:00Z",
+          "commentType": "text"
+        }
+      ]
+    }
+  ]
+}

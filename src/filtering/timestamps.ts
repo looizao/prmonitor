@@ -3,7 +3,7 @@ import { PullRequest } from "../storage/loaded-state";
 export function getLastUpdateTimestamp(pr: PullRequest) {
   let prTimestamp = Math.max(
     new Date(pr.updatedAt).getTime(),
-    getLastCommitTimestamp(pr)
+    getLastCommitTimestamp(pr),
   );
   for (const comment of pr.comments) {
     prTimestamp = Math.max(prTimestamp, new Date(comment.createdAt).getTime());
@@ -20,7 +20,7 @@ export function getLastUpdateTimestamp(pr: PullRequest) {
 export function getLastAuthorUpdateTimestamp(pr: PullRequest): number {
   return Math.max(
     getLastAuthorCommentTimestamp(pr),
-    getLastCommitTimestamp(pr)
+    getLastCommitTimestamp(pr),
   );
 }
 
@@ -33,7 +33,7 @@ export function getLastAuthorCommentTimestamp(pr: PullRequest): number {
 
 export function getLastReviewOrCommentTimestamp(
   pr: PullRequest,
-  login: string
+  login: string,
 ): number {
   let lastCommentedTime = 0;
   for (const review of pr.reviews) {
@@ -42,10 +42,12 @@ export function getLastReviewOrCommentTimestamp(
       // review when they didn't yet).
       continue;
     }
-    if (!review.submittedAt) {
+    if (!review.submittedAt && !review.observedAt) {
       continue;
     }
-    const submittedAt = new Date(review.submittedAt).getTime();
+    const submittedAt = review.submittedAt
+      ? new Date(review.submittedAt).getTime()
+      : review.observedAt!;
     if (review.authorLogin === login) {
       lastCommentedTime = Math.max(lastCommentedTime, submittedAt);
     }
